@@ -101,10 +101,12 @@ class Migrate extends Console
 
     public function create()
     {
-        if (trim($this->params['argv']['2']) == '') {
+        $tableName = trim($this->params['argv']['2']);
+        if ($tableName == '') {
             return $this->info('please input migrate name', 'error');
         }
-        $name      = str_replace([' ', ':', '/', '\\'], '_', $this->params['argv']['2']);
+
+        $name      = str_replace([' ', ':', '/', '\\'], '_', $tableName);
         $filename  = 'kx_' . date('YmdHis_') . $name;
         $file      = $this->path . $filename . '.php';
         $classname = ucfirst($filename);
@@ -120,7 +122,7 @@ class $classname extends Migrate
     // 执行修改
     public function up()
     {
-        \$this->create('',function(){
+        \$this->create('{$tableName}',function(){
             \$this->addComand("`id` int(10) unsigned NOT NULL AUTO_INCREMENT");
             \$this->addComand("PRIMARY KEY (`id`)");
         });
@@ -129,7 +131,7 @@ class $classname extends Migrate
     // 回滚修改
     public function down()
     {
-        \$this->drop('');
+        \$this->drop('{$tableName}');
     }
 }
 PHP;

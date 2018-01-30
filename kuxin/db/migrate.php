@@ -13,7 +13,7 @@ class Migrate
 
     protected $comands = [];
 
-    public function create(string $table, Closure $func, $engine = null)
+    public function create(string $table, Closure $func, $engine = 'innodb')
     {
         if (!$table) {
             return false;
@@ -23,10 +23,11 @@ class Migrate
 
         $field  = $this->combineCommand();
 
-        $engine = $engine ?: Config::get('database.engine');
+        $engine = $engine ?: Config::get('database.engine','innodb');
 
         if ($field) {
             $sql = "CREATE TABLE `{$table}` ({$field}) ENGINE={$engine} DEFAULT CHARSET=utf8;";
+            echo $sql;
             return $this->executeSql($sql);
         }
     }
