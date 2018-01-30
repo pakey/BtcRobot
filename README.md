@@ -10,7 +10,7 @@
 
 ## 使用方法
 1. env.example.php改为env.php
-然后修改里面常量值的为自己的信息
+然后修改里面常量值的为自己的信息，币安后台需要配置ip白名单
 2. php kx migrate:up 导入数据库
 3. php kx robot:start 运行
 4. php kx robot:stats 查看统计 
