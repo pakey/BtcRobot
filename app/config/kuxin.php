@@ -1,4 +1,5 @@
 <?php
+include KX_ROOT . '/env.php';
 return [
     'app' => [
         'debug' => true,
@@ -24,31 +25,21 @@ return [
         'common' => [
             'driver' => 'memcache',
             'option' => [
-                'host' => '127.0.0.1',
-                'port' => '11211',
-            ],
-        ],
-        'redis'  => [
-            'driver' => 'redis',
-            'option' => [
-                'host'     => '127.0.0.1',
-                'port'     => '6379',
-                'password' => null,
-                'database' => 0,
+                'host' => KX_CACHE_COMMON_HOST,
+                'port' => KX_CACHE_COMMON_PORT,
             ],
         ],
     ],
 
     'database' => [
-        //        'prefix' => 'ptcms_',
         'common' => [
             'driver' => 'mysql',
             'option' => [
-                'host' => '127.0.0.1',
-                'port' => '3306',
-                'user' => 'root',
-                'pwd'  => 'root',
-                'name' => 'btc38',
+                'host' => KX_DB_HOST,
+                'port' => KX_DB_PORT,
+                'user' => KX_DB_USER,
+                'pwd'  => KX_DB_PWD,
+                'name' => KX_DB_NAME,
             ],
         ],
     ],
