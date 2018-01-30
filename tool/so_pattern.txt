@@ -1,0 +1,1 @@
+http://www.kuaiyankanshu.net/(\d+)/	http://m.kuaiyankanshu.net/\1/

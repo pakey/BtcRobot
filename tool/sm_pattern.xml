@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset>
+    <url>
+        <loc>http://www.kuaiyankanshu.net</loc>
+        <data>
+            <display>
+                <pc_url_pattern>http://www.kuaiyankanshu.net/(\d+)/</pc_url_pattern>
+                <html5_url_pattern>http://m.kuaiyankanshu.net/${1}/</html5_url_pattern>
+            </display>
+        </data>
+    </url>
+    <url>
+        <loc>http://www.kuaiyankanshu.net</loc>
+        <data>
+            <display>
+                <pc_url_pattern>http://www.kuaiyankanshu.net/(.+?)</pc_url_pattern>
+                <html5_url_pattern>http://m.kuaiyankanshu.net/${1}</html5_url_pattern>
+            </display>
+        </data>
+    </url>
+</urlset>
