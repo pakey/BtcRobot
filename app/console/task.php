@@ -42,7 +42,6 @@ class Task extends Console
             if ($data) {
                 $trade->insertAll($data);
             }
-            //            echo $lasttid, '----', Math::file_size_format((memory_get_usage() - $mem)), PHP_EOL;
 
             DI::Storage('log')->write($coin . '_trade', date('Y-m-d H:i:s'));
             echo $lasttid, PHP_EOL;
