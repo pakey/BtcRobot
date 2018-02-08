@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Component\Exchange\Exchange;
+use App\Model\Price;
 use Kuxin\Controller;
 
 class Test extends Controller
@@ -11,9 +12,8 @@ class Test extends Controller
     {
         echo '<pre>';
         $exchange = new Exchange(BINANCE_APIKEY, BINANCE_SECRET);
-        $binance  = $exchange->binance;
-
-        $res = $binance->getKline('poe','btc','5');
+        $api      = $exchange->huobi;
+        $res      = $api->getKline('btc', '5');
         var_dump($res);
     }
 }

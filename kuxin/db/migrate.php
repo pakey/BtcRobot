@@ -27,7 +27,6 @@ class Migrate
 
         if ($field) {
             $sql = "CREATE TABLE `{$table}` ({$field}) ENGINE={$engine} DEFAULT CHARSET=utf8;";
-            echo $sql;
             return $this->executeSql($sql);
         }
     }

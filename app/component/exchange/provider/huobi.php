@@ -7,13 +7,28 @@ use Kuxin\Helper\Math;
 
 class Huobi extends Helper
 {
+
+    public $name='huobi';
+
     protected $apikey;
 
     protected $secret;
 
-    protected $market = 'USD';
+    public $market = 'usdt';
 
     const API_ENDPOINT = 'https://api.huobi.pro';
+
+    protected $times = [
+        '1minute'  => '1min',
+        '5minute'  => '5min',
+        '15minute' => '15min',
+        '30minute' => '30min',
+        '60minute' => '60min',
+        '1day'     => '1day',
+        '1week'    => '1week',
+        '1month'   => '1mon',
+        '1yeer'    => '1year',
+    ];
 
     public function __construct($apikey = '', $secret = '')
     {
@@ -23,7 +38,7 @@ class Huobi extends Helper
 
     public function setMarket($market)
     {
-        $this->market = $market;
+        $this->market = strtolower($market);
     }
 
     /**
@@ -75,46 +90,35 @@ class Huobi extends Helper
      * @param string $coin
      * @param string $interval
      * @param int    $limit
-     * @param string $startTime
-     * @param string $endTime
      * @return array
      */
-    public function getKline(string $coin, int $limit = 500, string $interval = '1m', string $startTime = '', string $endTime = ''): array
+    public function getKline(string $coin, int $limit = 500, string $interval = '1minute'): array
     {
+        $interval = $this->times[$interval] ?? $this->times['1minute'];
         $param = [
-            'symbol'   => strtoupper($coin . $this->market),
-            'interval' => $interval,
-            'limit'    => $limit,
+            'symbol' => strtolower($coin) . $this->market,
+            'period' => $interval,
+            'size'   => min(2000, max(1, $limit)),
         ];
-        if ($startTime) {
-            $param['startTime'] .= '000';
-        }
-        if ($endTime) {
-            $param['endTime'] .= '000';
-        }
-
-        $records = $this->getJson(self::API_ENDPOINT, '/api/v1/klines', $param);
+        $records = $this->getJson(self::API_ENDPOINT, '/market/history/kline', $param);
         $data    = [];
-        foreach ($records as $record) {
+        foreach ($records['data'] as $record) {
             $record      = array_map(function ($v) {
                 return Math::ScToNum($v, 8);
             }, $record);
-            $time        = date('YmdHi', substr($record[0], 0, -3));
+            $time        = date('YmdHi', $record['id']);
             $data[$time] = [
-                'time'        => $time,
-                'open'        => $record['1'],
-                'hign'        => $record['2'],
-                'low'         => $record['3'],
-                'close'       => $record['4'],
-                'volumn'      => $record['5'],
-                'money'       => $record['7'],
-                'num'         => $record['8'],
-                'buy_volumn'  => $record['9'],
-                'buy_money'   => $record['10'],
-                'sell_volumn' => $record['5'] - $record['9'],
-                'sell_money'  => $record['7'] - $record['10'],
+                'time'   => $time,
+                'open'   => $record['open'],
+                'high'   => $record['high'],
+                'low'    => $record['low'],
+                'close'  => $record['close'],
+                'volumn' => $record['amount'],
+                'money'  => $record['vol'],
+                'num'    => $record['count'],
             ];
         }
+        ksort($data);
         return $data;
     }
 

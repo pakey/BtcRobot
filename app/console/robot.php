@@ -7,20 +7,33 @@ use Kuxin\Console;
 
 
 class Robot extends Console{
-    public function kline()
+    public function coin()
     {
-        $exchange = new Exchange(BINANCE_APIKEY, BINANCE_SECRET);
-        $binance  = $exchange->binance;
-        $symbols=$binance->getSymbols('BTC');
+        $exchange = new Exchange(HUOBI_APIKEY, HUOBI_SECRET);
+        $api  = $exchange->huobi;
+        $coin='eos';
         $priceModel=Price::I();
-        foreach($symbols as $symbol){
-            $last=$priceModel->where(['coin'=>$symbol['coin'],'market'=>$symbol['market']])->order('id desc')->find();
-            $starTime=0;
-            if($priceModel){
-                $starTime=strtotime($last['time'].'00');
+        $last=$priceModel->where(['exchange'=>$api->name,'coin'=>$coin,'market'=>$api->market])->order('id desc')->limit(1)->find();
+        $lastTime=$last['time']??0;
+
+        do{
+            if(!$lastTime){
+                $limit=10000;
+                $records=$api->getKline($coin,$limit);
+                $priceModel->addInfos($records,$api->name,$coin,$api->market);
+            }elseif($lastTime!=date('YmdHi')){
+                $limit = strtotime($lastTime.'00')-time()+1;
+                $records=$api->getKline($coin,$limit);
+                $priceModel->updateInfos(array_shift($records),$api->name,$coin,$api->market);
+            }else{
+                $limit=1;
+                $records=$api->getKline($coin,$limit);
+                $priceModel->updateInfos($records,$api->name,$coin,$api->market);
             }
-            $res = $binance->getKline('poe','btc',500,'1m',$starTime);
-            var_dump($res);exit;
-        }
+            $lastTime=date('YmdHi');
+            sleep(1);
+            $this->info(date('Y-m-d H:i:s'));
+            exit;
+        }while(true);
     }
 }

@@ -11,7 +11,20 @@ class Binance extends Helper
 
     protected $secret;
 
-    protected $market = 'BTC';
+    public $market = 'BTC';
+
+    public $name='binance';
+
+    protected $times = [
+        '1minute'  => '1m',
+        '5minute'  => '5m',
+        '15minute' => '15m',
+        '30minute' => '30m',
+        '60minute' => '1h',
+        '1day'     => '1d',
+        '1week'    => '1w',
+        '1month'   => '1M',
+    ];
 
     const API_ENDPOINT = 'https://api.binance.com';
 
@@ -80,8 +93,10 @@ class Binance extends Helper
      * @param string $endTime
      * @return array
      */
-    public function getKline(string $coin, int $limit = 500, string $interval = '1m', string $startTime = '', string $endTime = ''): array
+    public function getKline(string $coin, int $limit = 500, string $interval = '1minute', string $startTime = '', string $endTime = ''): array
     {
+        $interval = $this->times[$interval] ?? $this->times['1minute'];
+
         $param = [
             'symbol'   => strtoupper($coin . $this->market),
             'interval' => $interval,
@@ -102,18 +117,14 @@ class Binance extends Helper
             }, $record);
             $time        = date('YmdHi', substr($record[0], 0, -3));
             $data[$time] = [
-                'time'        => $time,
-                'open'        => $record['1'],
-                'hign'        => $record['2'],
-                'low'         => $record['3'],
-                'close'       => $record['4'],
-                'volumn'      => $record['5'],
-                'money'       => $record['7'],
-                'num'         => $record['8'],
-                'buy_volumn'  => $record['9'],
-                'buy_money'   => $record['10'],
-                'sell_volumn' => $record['5'] - $record['9'],
-                'sell_money'  => $record['7'] - $record['10'],
+                'time'   => $time,
+                'open'   => $record['1'],
+                'high'   => $record['2'],
+                'low'    => $record['3'],
+                'close'  => $record['4'],
+                'volumn' => $record['5'],
+                'money'  => $record['7'],
+                'num'    => $record['8'],
             ];
         }
         return $data;

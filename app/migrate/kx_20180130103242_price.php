@@ -11,6 +11,7 @@ class Kx_20180130103242_price extends Migrate
     {
         $this->create('price',function(){
             $this->addComand("`id` int(10) unsigned NOT NULL AUTO_INCREMENT");
+            $this->addComand('`exchange` char(10) not null comment "交易所"');
             $this->addComand('`coin` char(10) not null comment "币种"');
             $this->addComand('`market` char(6) not null comment "市场"');
             $this->addComand('`time` bigint(14) unsigned comment "时间"');
@@ -21,14 +22,14 @@ class Kx_20180130103242_price extends Migrate
             $this->addComand('`volume` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`money` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`num` int unsigned default 0');
-            $this->addComand('`buy_volume` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`buy_money` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`sell_volume` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`sell_money` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`type` tinyint unsigned default 0 comment "1 buy 2 sell"');
+            $this->addComand('`change` DECIMAL(10,4) unsigned default 0');
+            $this->addComand('`rsi6` DECIMAL(8,4) unsigned default 0');
+            $this->addComand('`rsi12` DECIMAL(8,4) unsigned default 0');
+            $this->addComand('`k` DECIMAL(8,4) unsigned default 0');
+            $this->addComand('`d` DECIMAL(8,4) unsigned default 0');
             $this->addComand("PRIMARY KEY (`id`)");
-            $this->addComand("KEY `coin_market` (`coin`,`market`)");
-            $this->addComand("KEY `coin_time` (`coin`,`time`)");
+            $this->addComand("KEY `exchange` (`exchange`)");
+            $this->addComand("KEY `idx_exchange_coin_market_time` (`exchange`,`coin`,`market`,`time`)");
         });
     }
 
