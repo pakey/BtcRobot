@@ -14,6 +14,10 @@ class Router
     static $controller = 'index';
     static $action = 'index';
 
+    static $selfConsoleClass=[
+        'migrate',
+    ];
+
     /**
      * 解析controller和action
      */
@@ -35,10 +39,10 @@ class Router
                 } else {
                     $param = explode('/', $superVar);
                 }
-                self::$action     = array_pop($param);
-                self::$controller = implode('\\', $param);
+                self::$action     = strtolower(array_pop($param));
+                self::$controller = strtolower(implode('\\', $param));
             }else{
-                self::$controller = $superVar;
+                self::$controller = strtolower($superVar);
                 self::$action     = 'index';
             }
             unset($_GET['s']);
@@ -88,10 +92,10 @@ class Router
         $data = ['argv' => $argv];
         if (!empty($argv['2'])) {
             $param = explode('/', $argv['2']);
-            while ($k = each($param)) {
-                $data[$k['value']] = current($param);
-                next($param);
-            };
+            $num      = count($param);
+            for ($i = 0; $i < $num; $i += 2) {
+                $data[$param[$i]] = $param[$i + 1] ?? "";
+            }
         }
         Registry::set('cli_params', $data);
     }

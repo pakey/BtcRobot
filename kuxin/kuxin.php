@@ -72,13 +72,20 @@ class Kuxin
         if (PHP_SAPI == 'cli') {
             Router::cli();
             global $argv;
-            $className = 'App\\Console\\' . Router::$controller;
+            //系统console和用户的走不同的位置
+            if (in_array(Router::$controller, Router::$selfConsoleClass)) {
+                $controllerName = 'Kuxin\\Console\\' . Router::$controller;
+            } else {
+                $controllerName = 'App\\Console\\' . Router::$controller;
+            }
             unset($argv[0], $argv[1]);
-            $controller = Loader::instance($className, $argv);
+            $controller = Loader::instance($controllerName, $argv);
             $actionName = Router::$action;
             $controller->init();
             if (method_exists($controller, $actionName)) {
                 $controller->$actionName();
+            } else {
+                trigger_error('控制器[' . $controllerName . ']对应的方法[' . $actionName . ']不存在', E_USER_ERROR);
             }
         } else {
             Router::dispatcher();

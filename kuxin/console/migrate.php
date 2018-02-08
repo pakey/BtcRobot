@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console;
+namespace Kuxin\Console;
 
 
 use Kuxin\Console;

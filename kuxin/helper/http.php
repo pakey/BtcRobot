@@ -14,6 +14,7 @@ use Kuxin\Log;
 class Http
 {
 
+
     /**
      * @param        $url
      * @param array  $params
@@ -34,7 +35,7 @@ class Http
             //CURLOPT_FRESH_CONNECT  => false,
             //CURLOPT_MAXREDIRS      => 5,
             CURLOPT_USERAGENT      => Config::get('http.user_agent', 'PTCMS Framework Http Client'),
-            CURLOPT_REFERER        => $url,
+            CURLOPT_REFERER        => isset($header['referer']) ? $header['referer'] : $url,
             CURLOPT_NOSIGNAL       => 1,
             CURLOPT_ENCODING       => 'gzip, deflate',
             CURLOPT_SSL_VERIFYPEER => false,
@@ -45,11 +46,6 @@ class Http
             $opts[CURLOPT_PROXY]     = Config::get('http.proxy.host');
             $opts[CURLOPT_PROXYPORT] = Config::get('http.proxy.port');
             $opts[CURLOPT_PROXYTYPE] = Config::get('http.proxy.type');
-        }
-
-        if (isset($header['referer'])) {
-            $opts[CURLOPT_REFERER] = $header['referer'];
-            unset($header['referer']);
         }
 
         if (isset($header['cookie'])) {
@@ -80,6 +76,17 @@ class Http
         /* 根据请求类型设置特定参数 */
         switch (strtoupper($method)) {
             case 'GET':
+                if ($params) {
+                    if (is_array($params)) {
+                        $params = http_build_query($params);
+                    }
+                    if (strpos($url, '?')) {
+                        $url .= '&' . $params;
+                    } else {
+                        $url .= '?' . $params;
+                    }
+                    $opts[CURLOPT_URL] = $url;
+                }
                 break;
             case 'POST':
                 //判断是否传输文件
@@ -120,26 +127,14 @@ class Http
         return $data;
     }
 
-    public static function post($url, $data = [], $header = [], $option = [])
+    public static function get($url, $data = [])
     {
-        return self::curl($url, $data, 'POST', $header, $option);
+        return self::curl($url, $data, 'GET');
     }
 
-
-    public static function get($url, $data = [], $header = [], $option = [])
+    public static function post($url, $data = [], $header = [])
     {
-        if (is_array($data)) {
-            $data = http_build_query($data);
-        }
-        if ($data) {
-            if (strpos($url, '?')) {
-                $url .= '&' . $data;
-            } else {
-                $url .= '?' . $data;
-            }
-            $data = [];
-        }
-        return self::curl($url, $data, 'GET', $header, $option);
+        return self::curl($url, $data, 'POST', $header);
     }
 
     /**
