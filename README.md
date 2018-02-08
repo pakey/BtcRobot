@@ -1,7 +1,10 @@
-# A Robot For Binance.com
+# A Robot For BTCcoin in Binance、Huobi
+
+当前正在开发中，暂无法使用。了解情况可以关注下之前做的比特时代盘口机器人
 
 ## 币安交易机器人
 计划开发以下不同机器人
+
 - 买卖单机器人
 - 盘口机器人
 - 量化机器人

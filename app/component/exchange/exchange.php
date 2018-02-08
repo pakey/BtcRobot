@@ -9,6 +9,7 @@ use Kuxin\Loader;
  * @package App\Component\Exchange
  * @author  Pakey <pakey@qq.com>
  * @property \App\Component\Exchange\Provider\Binance $binance
+ * @property \App\Component\Exchange\Provider\Huobi   $huobi
  */
 class Exchange
 {

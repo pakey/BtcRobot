@@ -5,22 +5,21 @@ namespace App\Component\Exchange\Provider;
 use App\Component\Exchange\Helper;
 use Kuxin\Helper\Math;
 
-class Binance extends Helper
+class Huobi extends Helper
 {
     protected $apikey;
 
     protected $secret;
 
-    protected $market = 'BTC';
+    protected $market = 'USD';
 
-    const API_ENDPOINT = 'https://api.binance.com';
+    const API_ENDPOINT = 'https://api.huobi.pro';
 
     public function __construct($apikey = '', $secret = '')
     {
         $this->apikey = $apikey;
         $this->secret = $secret;
     }
-
 
     public function setMarket($market)
     {
@@ -118,6 +117,5 @@ class Binance extends Helper
         }
         return $data;
     }
-
 
 }
