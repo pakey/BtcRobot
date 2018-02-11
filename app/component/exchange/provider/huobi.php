@@ -3,12 +3,13 @@
 namespace App\Component\Exchange\Provider;
 
 use App\Component\Exchange\Helper;
+use Kuxin\Config;
 use Kuxin\Helper\Math;
 
 class Huobi extends Helper
 {
 
-    public $name='huobi';
+    public $name = 'huobi';
 
     protected $apikey;
 
@@ -34,6 +35,7 @@ class Huobi extends Helper
     {
         $this->apikey = $apikey;
         $this->secret = $secret;
+        Config::set('http.user_agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36');
     }
 
     public function setMarket($market)
@@ -95,13 +97,13 @@ class Huobi extends Helper
     public function getKline(string $coin, int $limit = 500, string $interval = '1minute'): array
     {
         $interval = $this->times[$interval] ?? $this->times['1minute'];
-        $param = [
+        $param    = [
             'symbol' => strtolower($coin) . $this->market,
             'period' => $interval,
             'size'   => min(2000, max(1, $limit)),
         ];
-        $records = $this->getJson(self::API_ENDPOINT, '/market/history/kline', $param);
-        $data    = [];
+        $records  = $this->getJson(self::API_ENDPOINT, '/market/history/kline', $param);
+        $data     = [];
         foreach ($records['data'] as $record) {
             $record      = array_map(function ($v) {
                 return Math::ScToNum($v, 8);
@@ -113,13 +115,43 @@ class Huobi extends Helper
                 'high'   => $record['high'],
                 'low'    => $record['low'],
                 'close'  => $record['close'],
-                'volumn' => $record['amount'],
+                'amount' => $record['amount'],
                 'money'  => $record['vol'],
                 'num'    => $record['count'],
             ];
         }
         ksort($data);
         return $data;
+    }
+
+    public function getAccountStatus()
+    {
+        return $this->getJson(self::API_ENDPOINT, '/v1/account/accounts', $this->createSignParams([],'/v1/account/accounts'));
+    }
+
+    protected function createSignParams($param, $path, $method = 'GET')
+    {
+        $param = array_merge([
+            'AccessKeyId'      => $this->apikey,
+            'SignatureMethod'  => 'HmacSHA256',
+            'SignatureVersion' => 2,
+            'Timestamp'        => gmdate('Y-m-d\TH:i:s'),
+        ], $param);
+
+        $param['Signature'] = $this->createSign($param, $path, $method);
+        return $param;
+    }
+
+    protected function createSign($param, $path, $method)
+    {
+        $u = [];
+        foreach ($param as $k => $v) {
+            $u[] = $k . "=" . urlencode($v);
+        }
+        asort($u);
+        $sign_param_1 = $method . "\n" . parse_url(self::API_ENDPOINT, PHP_URL_HOST) . "\n" . $path . "\n" . implode('&', $u);
+        $signature    = hash_hmac('sha256', $sign_param_1, $this->secret, true);
+        return base64_encode($signature);
     }
 
 }

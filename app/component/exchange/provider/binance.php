@@ -13,7 +13,7 @@ class Binance extends Helper
 
     public $market = 'BTC';
 
-    public $name='binance';
+    public $name = 'binance';
 
     protected $times = [
         '1minute'  => '1m',
@@ -102,12 +102,12 @@ class Binance extends Helper
             'interval' => $interval,
             'limit'    => $limit,
         ];
-        if ($startTime) {
-            $param['startTime'] .= '000';
-        }
-        if ($endTime) {
-            $param['endTime'] .= '000';
-        }
+        // if ($startTime) {
+        //     $param['startTime'] .= '000';
+        // }
+        // if ($endTime) {
+        //     $param['endTime'] .= '000';
+        // }
 
         $records = $this->getJson(self::API_ENDPOINT, '/api/v1/klines', $param);
         $data    = [];
@@ -122,7 +122,7 @@ class Binance extends Helper
                 'high'   => $record['2'],
                 'low'    => $record['3'],
                 'close'  => $record['4'],
-                'volumn' => $record['5'],
+                'amount' => $record['5'],
                 'money'  => $record['7'],
                 'num'    => $record['8'],
             ];

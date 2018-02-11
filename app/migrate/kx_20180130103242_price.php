@@ -17,14 +17,13 @@ class Kx_20180130103242_price extends Migrate
             $this->addComand('`time` bigint(14) unsigned comment "时间"');
             $this->addComand('`open` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`close` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`hign` DECIMAL(14,8) unsigned default 0');
+            $this->addComand('`high` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`low` DECIMAL(14,8) unsigned default 0');
-            $this->addComand('`volume` DECIMAL(14,8) unsigned default 0');
+            $this->addComand('`amount` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`money` DECIMAL(14,8) unsigned default 0');
             $this->addComand('`num` int unsigned default 0');
-            $this->addComand('`change` DECIMAL(10,4) unsigned default 0');
-            $this->addComand('`rsi6` DECIMAL(8,4) unsigned default 0');
-            $this->addComand('`rsi12` DECIMAL(8,4) unsigned default 0');
+            $this->addComand('`change` DECIMAL(10,4) default 0');
+            $this->addComand('`rsi` DECIMAL(8,4) unsigned default 0');
             $this->addComand('`k` DECIMAL(8,4) unsigned default 0');
             $this->addComand('`d` DECIMAL(8,4) unsigned default 0');
             $this->addComand("PRIMARY KEY (`id`)");

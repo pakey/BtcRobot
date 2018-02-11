@@ -13,4 +13,11 @@ class Helper
         $jsonResult = Json::decode($httpResult);
         return $jsonResult ?: [];
     }
+
+    protected function postJson(string $endpoint, string $path, array $params = []): array
+    {
+        $httpResult = Http::post($endpoint . $path, $params);
+        $jsonResult = Json::decode($httpResult);
+        return $jsonResult ?: [];
+    }
 }
