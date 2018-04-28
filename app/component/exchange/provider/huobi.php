@@ -17,7 +17,7 @@ class Huobi extends Helper
 
     public $market = 'usdt';
 
-    const API_ENDPOINT = 'https://api.huobi.pro';
+    const API_ENDPOINT = 'https://api.huobipro.com';
 
     protected $times = [
         '1minute'  => '1min',

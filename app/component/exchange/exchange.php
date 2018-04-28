@@ -2,6 +2,7 @@
 
 namespace App\Component\Exchange;
 
+use Kuxin\Config;
 use Kuxin\Loader;
 
 /**
@@ -23,6 +24,11 @@ class Exchange
     {
         $this->apikey = $apikey;
         $this->secret = $secret;
+
+        // Config::set('http.proxy.power',1);
+        // Config::set('http.proxy.host','127.0.0.1');
+        // Config::set('http.proxy.port',1087);
+        // Config::set('http.proxy.type',CURLPROXY_SOCKS5);
     }
 
     /**
@@ -35,7 +41,7 @@ class Exchange
         if (class_exists($class)) {
             return Loader::instance($class, [$this->apikey, $this->secret]);
         } else {
-            trigger_error('未定义的交易provider', E_USER_ERROR);
+            trigger_error('未定义的交易Provider', E_USER_ERROR);
         }
     }
 }

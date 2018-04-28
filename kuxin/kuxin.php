@@ -48,7 +48,7 @@ class Kuxin
         Registry::set('_http', []);
         Registry::set('_httpnum', 0);
         // 常量定义
-        define('KX_VERSION', '1.0.0');
+        define('KX_VERSION', '1.1.0');
 
 
         if (Config::get('app.debug')) {

@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Component\Exchange\Exchange;
-use App\Component\Stock;
+use App\Component\stock;
 use App\Model\Price;
 use Kuxin\Console;
 
@@ -167,7 +167,7 @@ class Robot extends Console
         // $api      = $exchange->binance;
         // $coin     = 'poe';
         $api     = $exchange->huobi;
-        $coin    = 'eos';
+        $coin    = 'btc';
         $oldData = $api->getKline($coin, '30', '1minute');
         $oldData = array_values($oldData);
         include KX_ROOT.'/func.php';
@@ -178,9 +178,9 @@ class Robot extends Console
         //
         // $this->info('-------------');
         $kdj=kd(json_decode(json_encode($oldData)));
-        foreach($oldData as $k=>$v){
-            $this->info( $v['time'] . '  | ' . $kdj['lines']['0']['data'][$k] . ' | ' . $kdj['lines']['1']['data'][$k]);
-        }
+        // foreach($oldData as $k=>$v){
+        //     $this->info( $v['time'] . '  | ' . $kdj['lines']['0']['data'][$k] . ' | ' . $kdj['lines']['1']['data'][$k]);
+        // }
         $this->info('-------------');
         $last    = ['k' => '50', 'd' => '50'];
         $prersv  = 100;
@@ -195,24 +195,25 @@ class Robot extends Console
                 $rsv    = ($item['close'] - $low) / ($high - $low) * 100;
                 $prersv = $rsv;
             }
+            var_dump($rsv);
             $k = 2 / 3 * ($last['k'] ?? 50) + $rsv / 3;
             $d = 2 / 3 * ($last['d'] ?? 50) + $k / 3;
             $k = round($k, 4);
             $d = round($d, 4);
-            $this->info( $item['time'] .' | ' . $k . ' | ' . $d);
+            // $this->info( $item['time'] .' | ' . $k . ' | ' . $d);
             $last = ['k' => $k, 'd' => $d];;
         }
-        $this->info('-------------');
-        for($i=0;$i<count($oldData);$i++){
-            $data=array_slice($oldData,max(0,$i-9),min($i+1,9));
-            $kd=Stock::KD($data);
-            $oldData[$i+8]['k']=$kd['k'];
-            $oldData[$i+8]['d']=$kd['d'];
-            $this->info( $oldData[$i+8]['time'] . '  | ' . $kd['k'] . ' | ' . $kd['d'] );
-            if($i>10){
-                exit;
-            }
-        }
+        // $this->info('-------------');
+        // for($i=0;$i<count($oldData);$i++){
+        //     $data=array_slice($oldData,max(0,$i-9),min($i+1,9));
+        //     $kd=Stock::KD($data);
+        //     $oldData[$i+8]['k']=$kd['k'];
+        //     $oldData[$i+8]['d']=$kd['d'];
+        //     $this->info( $oldData[$i+8]['time'] . '  | ' . $kd['k'] . ' | ' . $kd['d'] );
+        //     if($i>10){
+        //         exit;
+        //     }
+        // }
     }
 
     public function huobi()
