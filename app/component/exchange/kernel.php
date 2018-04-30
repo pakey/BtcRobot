@@ -5,7 +5,7 @@ namespace App\Component\Exchange;
 use Kuxin\Helper\Http;
 use Kuxin\Helper\Json;
 
-class Helper
+class Kernel
 {
     protected function getJson(string $endpoint, string $path, array $params = []): array
     {

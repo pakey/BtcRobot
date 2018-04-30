@@ -25,10 +25,10 @@ class Exchange
         $this->apikey = $apikey;
         $this->secret = $secret;
 
-        // Config::set('http.proxy.power',1);
-        // Config::set('http.proxy.host','127.0.0.1');
-        // Config::set('http.proxy.port',1087);
-        // Config::set('http.proxy.type',CURLPROXY_SOCKS5);
+        Config::set('http.proxy.power',1);
+        Config::set('http.proxy.host','127.0.0.1');
+        Config::set('http.proxy.port',1086);
+        Config::set('http.proxy.type',CURLPROXY_SOCKS5);
     }
 
     /**

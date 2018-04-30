@@ -1,10 +1,10 @@
-#!/usr/bin/env /usr/bin/php
+#!/usr/bin/env php
 <?php
 
 define('KX_ROOT', __DIR__);
 if (empty($argv['1'])) {
     exit('请输入要执行的操作!'.PHP_EOL);
 } else {
-    include KX_ROOT . '/kuxin/kuxin.php';
+    include KX_ROOT.'/kuxin/kuxin.php';
 }
 

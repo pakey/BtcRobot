@@ -2,11 +2,11 @@
 
 namespace App\Component\Exchange\Provider;
 
-use App\Component\Exchange\Helper;
+use App\Component\Exchange\Kernel;
 use Kuxin\Config;
 use Kuxin\Helper\Math;
 
-class Huobi extends Helper
+class Huobi extends Kernel
 {
 
     public $name = 'huobi';

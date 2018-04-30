@@ -2,10 +2,10 @@
 
 namespace App\Component\Exchange\Provider;
 
-use App\Component\Exchange\Helper;
+use App\Component\Exchange\Kernel;
 use Kuxin\Helper\Math;
 
-class Binance extends Helper
+class Binance extends Kernel
 {
     protected $apikey;
 

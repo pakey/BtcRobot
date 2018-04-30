@@ -23,7 +23,7 @@ return [
     'cache' => [
         'prefix' => 'kx_',
         'common' => [
-            'driver' => 'memcache',
+            'driver' => 'memcached',
             'option' => [
                 'host' => KX_CACHE_COMMON_HOST,
                 'port' => KX_CACHE_COMMON_PORT,
