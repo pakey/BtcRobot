@@ -39,7 +39,7 @@ class Migrate extends Console
                 continue;
             }
             $name = substr($file, 0, -4);
-            if (!in_array($name, $execed)) {
+            if (!in_array($name, $execed) && is_file($this->path . '/' . $name . '.php')) {
                 $noExec[] = $name;
             }
         }
