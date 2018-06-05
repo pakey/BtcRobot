@@ -17,7 +17,13 @@ class Cron extends Console
     {
         $exchange = new Exchange(HUOBI_APIKEY, HUOBI_SECRET);
         $api=$exchange->huobi;
-        var_dump($api->getAccountStatus());
+        $infos=$api->getAccountStatus();
+        foreach($infos['data'] as $v){
+            if($v['type']=='spot'){
+                var_dump($v['id']);
+            }
+        }
+        return '错误';
     }
 
     public function pool()

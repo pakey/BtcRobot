@@ -42,12 +42,33 @@ class Huobi extends Kernel
         '1yeer'    => '1year',
     ];
 
+    protected $accountId='';
+
     public function __construct($apikey = '', $secret = '')
     {
         $this->apikey = $apikey;
         $this->secret = $secret;
         Config::set('http.user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36');
 
+    }
+
+    public function setAccountId($id)
+    {
+        $this->accountId=$id;
+    }
+
+    public function getAccountId()
+    {
+        if(!$this->accountId){
+            $infos=$this->getAccountStatus();
+            foreach($infos['data'] as $v){
+                if($v['type']=='spot'){
+                    $this->accountId=$v['id'];
+                    break;
+                }
+            }
+        }
+        return $this->accountId;
     }
 
 
@@ -216,7 +237,7 @@ class Huobi extends Kernel
 
     public function getBalance($coin, $market = null)
     {
-        $accountId = HUOBI_SPOT_ID;
+        $accountId = $this->getAccountId();
         $path      = "/v1/account/accounts/{$accountId}/balance";
         $records   = $this->getJson(self::API_ENDPOINT, $path, $this->createSignParams([], $path));
         $result    = [];
@@ -232,7 +253,7 @@ class Huobi extends Kernel
     {
         $path  = '/v1/order/orders/place';
         $param = [
-            'account-id' => HUOBI_SPOT_ID,
+            'account-id' => $this->getAccountId(),
             'amount'     => (string)$amount,
             'symbol'     => $coin . $this->market,
             'type'       => $type,

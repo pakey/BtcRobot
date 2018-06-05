@@ -12,4 +12,3 @@ const KX_CACHE_COMMON_PORT = 11211;
 
 const HUOBI_APIKEY = '';
 const HUOBI_SECRET = '';
-const HUOBI_SPOT_ID = '';
