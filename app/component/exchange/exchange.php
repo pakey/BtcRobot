@@ -29,10 +29,10 @@ class Exchange
         $this->apikey = $apikey;
         $this->secret = $secret;
 
-        // Config::set('http.proxy.power', 1);
-        // Config::set('http.proxy.host', '127.0.0.1');
-        // Config::set('http.proxy.port', 1086);
-        // Config::set('http.proxy.type', CURLPROXY_SOCKS5);
+        Config::set('http.proxy.power', PROXY_POWER);
+        Config::set('http.proxy.host', PROXY_HOST);
+        Config::set('http.proxy.port', PROXY_PORT);
+        Config::set('http.proxy.type', PROXY_TYPE);
     }
 
     /**
@@ -89,13 +89,7 @@ class Exchange
                             if ($buy['0'] > $price) {
                                 $res = $api->orderCancel($orderId);
                                 if ($res['status'] == 'ok') {
-                                    do {
-                                        $balance = $api->getBalance($coin);
-                                        if ($balance['trade'] > 0 || $balance['frozen'] == 0) {
-                                            break;
-                                        }
-                                        sleep(0.2);
-                                    } while (true);
+                                    $balance = $api->getBalance($coin);
                                     if ($balance['trade'] < $amount / 5) {
                                         $nowprice = $buy['0'] + 1 / pow(10, $info['price']);
                                         if ($nowprice / $originalPrice - 1 > 0.01) {
