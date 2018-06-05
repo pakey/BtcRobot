@@ -65,6 +65,6 @@ class Math
             $a = explode("e", strtolower($num));
             return bcmul($a[0], bcpow(10, $a[1], $double), $double);
         }
-        return $num;
+        return round($num, $double);
     }
 }

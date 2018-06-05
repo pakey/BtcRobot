@@ -4,10 +4,21 @@ namespace App\Component\Exchange\Provider;
 
 use App\Component\Exchange\Kernel;
 use Kuxin\Config;
+use Kuxin\Helper\Http;
+use Kuxin\Helper\Json;
 use Kuxin\Helper\Math;
 
 class Huobi extends Kernel
 {
+
+    const BUY = 'buy-limit';
+    const BUY_LIMIT = 'buy-limit';
+    const BUY_MARKET = 'buy-market';
+    const BUY_IOC = 'buy-ioc';
+    const SELL_MARKET = 'sell-market';
+    const SELL_LIMIT = 'sell-limit';
+    const SELL = 'sell-limit';
+    const SELL_IOC = 'sell-ioc';
 
     public $name = 'huobi';
 
@@ -35,7 +46,16 @@ class Huobi extends Kernel
     {
         $this->apikey = $apikey;
         $this->secret = $secret;
-        Config::set('http.user_agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36');
+        Config::set('http.user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36');
+
+    }
+
+
+    protected function postJson(string $endpoint, string $path, array $params = []): array
+    {
+        $httpResult = Http::post($endpoint . $path . '?' . http_build_query($this->createSignParams([], $path, 'POST')), Json::encode($params), ['Content-Type' => 'application/json']);
+        $jsonResult = Json::decode($httpResult);
+        return $jsonResult ?: [];
     }
 
     public function setMarket($market)
@@ -58,15 +78,38 @@ class Huobi extends Kernel
      */
     public function getSymbols(): array
     {
-        $records = $this->getJson(self::API_ENDPOINT, '/api/v1/exchangeInfo');
+        $records = $this->getJson(self::API_ENDPOINT, '/v1/common/symbols');
         $data    = [];
-        foreach ($records['symbols'] as $item) {
-            if ($item['quoteAsset'] != $this->market) {
+        foreach ($records['data'] as $item) {
+            if ($item['quote-currency'] != $this->market) {
                 continue;
             }
-            $data[] = ['coin' => $item['baseAsset'], 'market' => $item['quoteAsset']];
+            $data[] = $item['base-currency'];
         }
         return $data;
+    }
+
+    /**
+     * 获取单个币种交易信息
+     * @return array
+     */
+    public function getSymbolInfo(string $coin): array
+    {
+        static $records = [];
+        if (!$records) {
+            $records = $this->getJson(self::API_ENDPOINT, '/v1/common/symbols');
+        }
+        foreach ($records['data'] as $item) {
+            if ($item['quote-currency'] == $this->market && $item['base-currency'] == $coin) {
+                return [
+                    'name'   => $coin,
+                    'market' => $this->market,
+                    'price'  => $item['price-precision'],
+                    'amount' => $item['amount-precision'],
+                ];
+            }
+        }
+        trigger_error('找不到的货币信息', E_ERROR);
     }
 
     /**
@@ -88,6 +131,28 @@ class Huobi extends Kernel
     }
 
     /**
+     * 交易历史
+     * @param string $coin
+     * @return array
+     */
+    public function getTradeDepth(string $coin): array
+    {
+        $param = [
+            'type'   => 'step0',
+            'symbol' => $coin . $this->market,
+        ];
+        do {
+            $records = $this->getJson(self::API_ENDPOINT, '/market/depth', $param);
+            if ($records['status'] == 'ok') {
+                break;
+            }
+            sleep(0.1);
+        } while (true);
+
+        return $records['tick'];
+    }
+
+    /**
      * K线记录
      * @param string $coin
      * @param string $interval
@@ -100,15 +165,17 @@ class Huobi extends Kernel
         $param    = [
             'symbol' => strtolower($coin) . $this->market,
             'period' => $interval,
-            'size'   => min(2000, max(1, $limit)),
+            'size'   => min(1000, max(1, $limit)),
         ];
         $records  = $this->getJson(self::API_ENDPOINT, '/market/history/kline', $param);
         $data     = [];
+        $price    = 0;
         foreach ($records['data'] as $record) {
             $record      = array_map(function ($v) {
                 return Math::ScToNum($v, 8);
             }, $record);
             $time        = date('YmdHi', $record['id']);
+            $price       = $record['amount'] ? Math::ScToNum($record['vol'] / $record['amount'], 8) : $price;
             $data[$time] = [
                 'time'   => $time,
                 'open'   => $record['open'],
@@ -118,6 +185,7 @@ class Huobi extends Kernel
                 'amount' => $record['amount'],
                 'money'  => $record['vol'],
                 'num'    => $record['count'],
+                'price'  => $price,
             ];
         }
         ksort($data);
@@ -126,8 +194,80 @@ class Huobi extends Kernel
 
     public function getAccountStatus()
     {
-        return $this->getJson(self::API_ENDPOINT, '/v1/account/accounts', $this->createSignParams([],'/v1/account/accounts'));
+        return $this->getJson(self::API_ENDPOINT, '/v1/account/accounts', $this->createSignParams([], '/v1/account/accounts'));
     }
+
+    public function getAccountIds($coin = null, $market = null)
+    {
+        $path    = '/v1/account/accounts';
+        $records = $this->getJson(self::API_ENDPOINT, $path, $this->createSignParams([], $path));
+        $data    = [];
+        foreach ($records['data'] as $record) {
+            if ($record['type'] == 'spot') {
+                $data[$record['subtype']] = $record['id'];
+            }
+        }
+        if ($coin) {
+            $market = $market ?? $this->market;
+            return $data[$coin . $market] ?? "";
+        }
+        return $data;
+    }
+
+    public function getBalance($coin, $market = null)
+    {
+        $accountId = HUOBI_SPOT_ID;
+        $path      = "/v1/account/accounts/{$accountId}/balance";
+        $records   = $this->getJson(self::API_ENDPOINT, $path, $this->createSignParams([], $path));
+        $result    = [];
+        foreach ($records['data']['list'] as $k => $v) {
+            if ($v['currency'] == $coin) {
+                $result[$v['type']] = $v['balance'];
+            }
+        }
+        return $result;
+    }
+
+    public function orderSubmit($coin, $amount = 0, $price = 0, $type = self::BUY_LIMIT)
+    {
+        $path  = '/v1/order/orders/place';
+        $param = [
+            'account-id' => HUOBI_SPOT_ID,
+            'amount'     => (string)$amount,
+            'symbol'     => $coin . $this->market,
+            'type'       => $type,
+            'source'     => 'api',
+        ];
+        switch ($type) {
+            case self::BUY_LIMIT:
+            case self::SELL_LIMIT:
+                $param['price'] = (string)$price;
+                break;
+        }
+        $records = $this->postJson(self::API_ENDPOINT, $path, $param);
+        if ($records['status'] != 'ok') {
+            var_dump($this->getBalance($coin));
+            var_dump($records, $param);
+            debug_print_backtrace(2);
+            return false;
+        }
+        return $records['data'];
+    }
+
+    public function orderInfo($orderId)
+    {
+        $path    = '/v1/order/orders/' . $orderId;
+        $records = $this->getJson(self::API_ENDPOINT, $path, $this->createSignParams([], $path));
+        return $records;
+    }
+
+    public function orderCancel($orderId)
+    {
+        $path    = '/v1/order/orders/' . $orderId . '/submitcancel';
+        $records = $this->postJson(self::API_ENDPOINT, $path, $this->createSignParams([], $path));
+        return $records;
+    }
+
 
     protected function createSignParams($param, $path, $method = 'GET')
     {
