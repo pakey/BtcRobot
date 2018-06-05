@@ -16,10 +16,10 @@ class Cron extends Console
     public function user()
     {
         $exchange = new Exchange(HUOBI_APIKEY, HUOBI_SECRET);
-        $api=$exchange->huobi;
-        $infos=$api->getAccountStatus();
-        foreach($infos['data'] as $v){
-            if($v['type']=='spot'){
+        $api      = $exchange->huobi;
+        $infos    = $api->getAccountStatus();
+        foreach ($infos['data'] as $v) {
+            if ($v['type'] == 'spot') {
                 var_dump($v['id']);
             }
         }
@@ -209,8 +209,8 @@ class Cron extends Console
     {
         $exchange = new Exchange(HUOBI_APIKEY, HUOBI_SECRET);
         $exchange->setExchange('huobi');
-        $coin    = $this->param('coin', 'str', 'btc');
-        $exchange->sell($coin,0);
+        $coin = $this->param('coin', 'str', 'btc');
+        $exchange->sell($coin, 0);
     }
 
     public function kd()
@@ -304,25 +304,20 @@ class Cron extends Console
                     $v        = $last;
                     $k        = count($data) - 1;
                     $calcData = array_values($data);
-                    if ($v['k'] > $v['d'] && $v['k'] <= 80 && $v['k'] >= 5 && ($v['price'] > $calcData[$k - 1]['price'] || $calcData[$k - 1]['k'] <= $calcData[$k - 1]['d'])) {
-                        if (!$buy) {
-                            $buyResult = $exchange->buyWithMoney($coin, $mymoney);
-                            if ($buyResult) {
-                                $buy = $buyResult['price'];
-                                $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 买进 ' . json_encode($buyResult), 'success');
-                            } else {
-                                echo('挂单失败错误终止'), PHP_EOL;
-                            }
-
+                    if (!$buy && $v['k'] > $v['d'] && $v['k'] <= 80 && $v['k'] >= 5 && ($v['price'] > $calcData[$k - 1]['price'] || $calcData[$k - 1]['k'] <= $calcData[$k - 1]['d'])) {
+                        $buyResult = $exchange->buyWithMoney($coin, $mymoney);
+                        if ($buyResult) {
+                            $buy = $buyResult['price'];
+                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 买进 ' . json_encode($buyResult), 'success');
+                        } else {
+                            echo('挂单失败错误终止'), PHP_EOL;
                         }
-                    } elseif ($v['k'] <= 95 && $v['k'] < $v['d'] && ($v['price'] < $calcData[$k - 1]['price'] || $calcData[$k - 1]['k'] >= $calcData[$k - 1]['d'])) {
-                        if ($buy) {
-                            $sellResult = $exchange->sell($coin, $buyResult['amount']);
-                            $zhege      = round(($sellResult['price'] - $buy) / $buy, 8);
-                            $lirun      += $zhege;
-                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | ' . $sellResult['price'] . ' | 卖出 | ' . $zhege . '|' . $lirun . ' ' . json_encode($sellResult), 'warning');
-                            $buy = 0;
-                        }
+                    } elseif ($buy && $v['k'] <= 95 && $v['k'] < $v['d'] && ($v['price'] < $calcData[$k - 1]['price'] || $calcData[$k - 1]['k'] >= $calcData[$k - 1]['d'])) {
+                        $sellResult = $exchange->sell($coin, $buyResult['amount']);
+                        $zhege      = round(($sellResult['price'] - $buy) / $buy, 8);
+                        $lirun      += $zhege;
+                        $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | ' . $sellResult['price'] . ' | 卖出 | ' . $zhege . '|' . $lirun . ' ' . json_encode($sellResult), 'warning');
+                        $buy = 0;
                     } else {
                         $selltime = 0;
                         $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d']);
@@ -354,31 +349,27 @@ class Cron extends Console
                 $k        = count($data) - 1;
                 $calcData = array_values($data);
 
-                if ($v['k'] > $v['d'] && $v['k'] <= 80 && $v['k'] >= 5 && ($calcData[$k - 1]['k'] <= $calcData[$k - 1]['d'] || $v['price'] > $calcData[$k - 1]['price'])) {
-                    if (!$buy) {
-                        $buyResult = $exchange->buyWithMoney($coin, $mymoney);
-                        if ($buyResult) {
-                            $buy = $buyResult['price'];
-                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 买进 ' . json_encode($buyResult), 'success');
-                        } else {
-                            echo('挂单失败错误终止'), PHP_EOL;
-                        }
+                if (!$buy && $v['k'] > $v['d'] && $v['k'] <= 80 && $v['k'] >= 5 && ($calcData[$k - 1]['k'] <= $calcData[$k - 1]['d'] || $v['price'] > $calcData[$k - 1]['price'])) {
+                    $buyResult = $exchange->buyWithMoney($coin, $mymoney);
+                    if ($buyResult) {
+                        $buy = $buyResult['price'];
+                        $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 买进 ' . json_encode($buyResult), 'success');
+                    } else {
+                        echo('挂单失败错误终止'), PHP_EOL;
                     }
-                } elseif ($v['k'] < $v['d'] && $v['k'] <= 95 && ($calcData[$k - 1]['k'] >= $calcData[$k - 1]['d'] || $v['price'] <= $calcData[$k - 1]['price'])) {
-                    if ($buy) {
-                        if ($selltime >= 2) {
-                            $sellResult = $exchange->sell($coin, $buyResult['amount']);
-                            $zhege      = round(($sellResult['price'] - $buy) / $buy, 8);
-                            $lirun      += $zhege;
-                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 卖出 | ' . $zhege . '|' . $lirun . ' ' . json_encode($sellResult), 'warning');
-                            $buy = 0;
-                        } elseif ($selltime) {
-                            $selltime++;
-                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | selltime ' . $selltime, 'info');
-                        } else {
-                            $selltime = 1;
-                            $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | selltime ' . $selltime, 'info');
-                        }
+                } elseif ($buy && $v['k'] < $v['d'] && $v['k'] <= 95 && ($calcData[$k - 1]['k'] >= $calcData[$k - 1]['d'] || $v['price'] <= $calcData[$k - 1]['price'])) {
+                    if ($selltime >= 2) {
+                        $sellResult = $exchange->sell($coin, $buyResult['amount']);
+                        $zhege      = round(($sellResult['price'] - $buy) / $buy, 8);
+                        $lirun      += $zhege;
+                        $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | 卖出 | ' . $zhege . '|' . $lirun . ' ' . json_encode($sellResult), 'warning');
+                        $buy = 0;
+                    } elseif ($selltime) {
+                        $selltime++;
+                        $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | selltime ' . $selltime, 'info');
+                    } else {
+                        $selltime = 1;
+                        $this->info(date('Y-m-d H:i:s') . ' | ' . $v['price'] . ' | ' . $v['k'] . ' | ' . $v['d'] . ' | selltime ' . $selltime, 'info');
                     }
                 } else {
                     $selltime = 0;
