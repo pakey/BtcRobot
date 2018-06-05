@@ -200,6 +200,19 @@ class Cron extends Console
         $pool->start();
     }
 
+    public function bot()
+    {
+        $this->kd();
+    }
+
+    public function sell()
+    {
+        $exchange = new Exchange(HUOBI_APIKEY, HUOBI_SECRET);
+        $exchange->setExchange('huobi');
+        $coin    = $this->param('coin', 'str', 'btc');
+        $exchange->sell($coin,0);
+    }
+
     public function kd()
     {
         $day      = 7;
