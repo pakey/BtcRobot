@@ -70,8 +70,9 @@ class Exchange
                 break;
             }
         } while (true);
-        $price  = $prices[0] + (1 / pow(10, $info['price']));
-        $amount = floor($money / $price * pow(10, $info['amount'])) / pow(10, $info['amount']);
+        $originalPrice = $prices[0];
+        $price         = $prices[0] + (1 / pow(10, $info['price']));
+        $amount        = floor($money / $price * pow(10, $info['amount'])) / pow(10, $info['amount']);
         echo '买单', $prices[0], '---', $price, '---', $amount, PHP_EOL;
         $orderId = $api->orderSubmit($coin, $amount, $price);
         if ($orderId) {
@@ -96,7 +97,11 @@ class Exchange
                                         sleep(0.2);
                                     } while (true);
                                     if ($balance['trade'] < $amount / 5) {
-                                        $nowprice   = $buy['0'] + 1 / pow(10, $info['price']);
+                                        $nowprice = $buy['0'] + 1 / pow(10, $info['price']);
+                                        if ($nowprice / $originalPrice - 1 > 0.01) {
+                                            echo '买单单价上浮超过1% 放弃挂单', PHP_EOL;
+                                            return false;
+                                        }
                                         $amount     = floor($money / $nowprice * pow(10, $info['amount'])) / pow(10, $info['amount']);
                                         $newOrderId = $api->orderSubmit($coin, $amount, $nowprice);
                                         if ($newOrderId) {
