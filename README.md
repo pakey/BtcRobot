@@ -1,4 +1,4 @@
-# A Robot For BTCcoin in Huobi
+# A Robot For Huobi
 
 当前正在开发中，暂无法使用。了解情况可以关注下之前做的比特时代盘口机器人
 
